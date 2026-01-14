@@ -380,11 +380,11 @@ export function RegistrationModal({ open, onOpenChange }: RegistrationModalProps
                     >
                       <SelectValue placeholder="Select team size" />
                     </SelectTrigger>
-                    <SelectContent className="z-50">
-                      <SelectItem value="1">1 Member (Solo)</SelectItem>
-                      <SelectItem value="2">2 Members</SelectItem>
-                      <SelectItem value="3">3 Members</SelectItem>
-                      <SelectItem value="4">4 Members</SelectItem>
+                    <SelectContent className="z-50 !bg-white !text-gray-900 border-2 border-gray-200 shadow-lg">
+                      <SelectItem value="1" className="!text-gray-900 hover:!bg-orange-50 focus:!bg-orange-50">1 Member (Solo)</SelectItem>
+                      <SelectItem value="2" className="!text-gray-900 hover:!bg-orange-50 focus:!bg-orange-50">2 Members</SelectItem>
+                      <SelectItem value="3" className="!text-gray-900 hover:!bg-orange-50 focus:!bg-orange-50">3 Members</SelectItem>
+                      <SelectItem value="4" className="!text-gray-900 hover:!bg-orange-50 focus:!bg-orange-50">4 Members</SelectItem>
                     </SelectContent>
                   </Select>
                   {errors.teamSize && <p className="text-xs text-red-600">{errors.teamSize}</p>}
@@ -548,11 +548,11 @@ export function RegistrationModal({ open, onOpenChange }: RegistrationModalProps
                             <SelectTrigger className={`!bg-white border-2 ${errors[`member_${member.id}_role`] ? "border-red-600" : "border-gray-300"}`}>
                               <SelectValue placeholder="Select role" />
                             </SelectTrigger>
-                            <SelectContent className="z-50">
-                              <SelectItem value="developer">Developer</SelectItem>
-                              <SelectItem value="ai">AI/ML</SelectItem>
-                              <SelectItem value="design">Design</SelectItem>
-                              <SelectItem value="domain">Domain Expert</SelectItem>
+                            <SelectContent className="z-50 !bg-white !text-gray-900 border-2 border-gray-200 shadow-lg">
+                              <SelectItem value="developer" className="!text-gray-900 hover:!bg-orange-50 focus:!bg-orange-50">Developer</SelectItem>
+                              <SelectItem value="ai" className="!text-gray-900 hover:!bg-orange-50 focus:!bg-orange-50">AI/ML</SelectItem>
+                              <SelectItem value="design" className="!text-gray-900 hover:!bg-orange-50 focus:!bg-orange-50">Design</SelectItem>
+                              <SelectItem value="domain" className="!text-gray-900 hover:!bg-orange-50 focus:!bg-orange-50">Domain Expert</SelectItem>
                             </SelectContent>
                           </Select>
                           {errors[`member_${member.id}_role`] && (
@@ -667,11 +667,11 @@ export function RegistrationModal({ open, onOpenChange }: RegistrationModalProps
                     >
                       <SelectValue placeholder="Select experience level" />
                     </SelectTrigger>
-                    <SelectContent className="z-50">
-                      <SelectItem value="beginner">Beginner (Learning)</SelectItem>
-                      <SelectItem value="intermediate">Intermediate (Some Projects)</SelectItem>
-                      <SelectItem value="advanced">Advanced (Multiple Projects)</SelectItem>
-                      <SelectItem value="expert">Expert (Professional/Research)</SelectItem>
+                    <SelectContent className="z-50 !bg-white !text-gray-900 border-2 border-gray-200 shadow-lg">
+                      <SelectItem value="beginner" className="!text-gray-900 hover:!bg-orange-50 focus:!bg-orange-50">Beginner (Learning)</SelectItem>
+                      <SelectItem value="intermediate" className="!text-gray-900 hover:!bg-orange-50 focus:!bg-orange-50">Intermediate (Some Projects)</SelectItem>
+                      <SelectItem value="advanced" className="!text-gray-900 hover:!bg-orange-50 focus:!bg-orange-50">Advanced (Multiple Projects)</SelectItem>
+                      <SelectItem value="expert" className="!text-gray-900 hover:!bg-orange-50 focus:!bg-orange-50">Expert (Professional/Research)</SelectItem>
                     </SelectContent>
                   </Select>
                   {errors.priorExperience && <p className="text-xs text-red-600">{errors.priorExperience}</p>}

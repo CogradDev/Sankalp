@@ -24,13 +24,52 @@ export function RegistrationModal({ isOpen, onClose }: RegistrationModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [error, setError] = useState<string>("")
+  const [errors, setErrors] = useState<Record<string, string>>({})
+
+  // Validation helper functions
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return emailRegex.test(email)
+  }
+
+  const validatePhone = (phone: string): boolean => {
+    const phoneRegex = /^\d{10}$/
+    return phoneRegex.test(phone.replace(/\D/g, ""))
+  }
 
   if (!isOpen) return null
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Validate form fields
+    const newErrors: Record<string, string> = {}
+    
+    if (!formData.name.trim()) {
+      newErrors.name = "Full name is required"
+    }
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required"
+    } else if (!validateEmail(formData.email)) {
+      newErrors.email = "Please enter a valid email address"
+    }
+    if (!formData.phone.trim()) {
+      newErrors.phone = "Phone number is required"
+    } else if (!validatePhone(formData.phone)) {
+      newErrors.phone = "Please enter a valid 10-digit phone number"
+    }
+    if (!formData.organization.trim()) {
+      newErrors.organization = "Organization/Institution is required"
+    }
+    
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors)
+      return
+    }
+    
     setIsSubmitting(true)
     setError("")
+    setErrors({})
 
     try {
       const response = await fetch("/api/register", {
@@ -62,6 +101,7 @@ export function RegistrationModal({ isOpen, onClose }: RegistrationModalProps) {
           category: "student",
           event_participation_type: "main_event",
         })
+        setErrors({})
         onClose()
       }, 3000)
     } catch (err: any) {
@@ -75,6 +115,14 @@ export function RegistrationModal({ isOpen, onClose }: RegistrationModalProps) {
       ...formData,
       [e.target.name]: e.target.value,
     })
+    // Clear error for this field when user starts typing
+    if (errors[e.target.name]) {
+      setErrors((prev) => {
+        const newErrors = { ...prev }
+        delete newErrors[e.target.name]
+        return newErrors
+      })
+    }
   }
 
   return (
@@ -129,9 +177,12 @@ export function RegistrationModal({ isOpen, onClose }: RegistrationModalProps) {
                     value={formData.name}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all outline-none text-gray-900"
+                    className={`w-full px-4 py-3 border-2 rounded-xl focus:ring-2 focus:ring-orange-200 transition-all outline-none text-gray-900 ${
+                      errors.name ? "border-red-500 focus:border-red-500" : "border-gray-200 focus:border-orange-500"
+                    }`}
                     placeholder="Enter your full name"
                   />
+                  {errors.name && <p className="text-xs text-red-600 mt-1">{errors.name}</p>}
                 </div>
 
                 <div>
@@ -145,9 +196,12 @@ export function RegistrationModal({ isOpen, onClose }: RegistrationModalProps) {
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all outline-none text-gray-900"
+                    className={`w-full px-4 py-3 border-2 rounded-xl focus:ring-2 focus:ring-orange-200 transition-all outline-none text-gray-900 ${
+                      errors.email ? "border-red-500 focus:border-red-500" : "border-gray-200 focus:border-orange-500"
+                    }`}
                     placeholder="your.email@example.com"
                   />
+                  {errors.email && <p className="text-xs text-red-600 mt-1">{errors.email}</p>}
                 </div>
 
                 <div>
@@ -165,12 +219,23 @@ export function RegistrationModal({ isOpen, onClose }: RegistrationModalProps) {
                         ...formData,
                         phone: numericValue,
                       })
+                      // Clear error when user types
+                      if (errors.phone) {
+                        setErrors((prev) => {
+                          const newErrors = { ...prev }
+                          delete newErrors.phone
+                          return newErrors
+                        })
+                      }
                     }}
                     required
                     maxLength={10}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all outline-none text-gray-900"
+                    className={`w-full px-4 py-3 border-2 rounded-xl focus:ring-2 focus:ring-orange-200 transition-all outline-none text-gray-900 ${
+                      errors.phone ? "border-red-500 focus:border-red-500" : "border-gray-200 focus:border-orange-500"
+                    }`}
                     placeholder="10-digit mobile number"
                   />
+                  {errors.phone && <p className="text-xs text-red-600 mt-1">{errors.phone}</p>}
                 </div>
 
                 <div>
@@ -184,9 +249,12 @@ export function RegistrationModal({ isOpen, onClose }: RegistrationModalProps) {
                     value={formData.organization}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all outline-none text-gray-900"
+                    className={`w-full px-4 py-3 border-2 rounded-xl focus:ring-2 focus:ring-orange-200 transition-all outline-none text-gray-900 ${
+                      errors.organization ? "border-red-500 focus:border-red-500" : "border-gray-200 focus:border-orange-500"
+                    }`}
                     placeholder="Your institution or company"
                   />
+                  {errors.organization && <p className="text-xs text-red-600 mt-1">{errors.organization}</p>}
                 </div>
 
                 <div>

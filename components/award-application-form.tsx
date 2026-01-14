@@ -56,6 +56,7 @@ export function AwardApplicationForm({ onClose }: { onClose?: () => void }) {
   const [currentStep, setCurrentStep] = useState(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitSuccess, setSubmitSuccess] = useState(false)
+  const [errors, setErrors] = useState<Record<string, string>>({})
   const [formData, setFormData] = useState<FormData>({
     applicant_name: "",
     designation: "",
@@ -86,13 +87,192 @@ export function AwardApplicationForm({ onClose }: { onClose?: () => void }) {
 
   const totalSteps = 5 // Grouped into 5 main steps
 
+  // Validation helper functions
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return emailRegex.test(email)
+  }
+
+  const validatePhone = (phone: string): boolean => {
+    const phoneRegex = /^\d{10}$/
+    return phoneRegex.test(phone.replace(/\D/g, ""))
+  }
+
+  const validateURL = (url: string): boolean => {
+    if (!url.trim()) return true // Optional field
+    const urlRegex = /^https?:\/\/.+/
+    return urlRegex.test(url)
+  }
+
+  const countWords = (text: string): number => {
+    return text.trim().split(/\s+/).filter((word) => word.length > 0).length
+  }
+
+  const validateWordCount = (text: string, min: number, max: number): boolean => {
+    const wordCount = countWords(text)
+    return wordCount >= min && wordCount <= max
+  }
+
   const updateFormData = (field: keyof FormData, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
+    // Clear error for this field when user starts typing
+    if (errors[field]) {
+      setErrors((prev) => {
+        const newErrors = { ...prev }
+        delete newErrors[field]
+        return newErrors
+      })
+    }
+  }
+
+  const validateStep1 = (): boolean => {
+    const newErrors: Record<string, string> = {}
+    
+    if (!formData.applicant_name.trim()) {
+      newErrors.applicant_name = "Full name is required"
+    }
+    if (!formData.designation.trim()) {
+      newErrors.designation = "Designation is required"
+    }
+    if (!formData.organization.trim()) {
+      newErrors.organization = "Organization/Institution is required"
+    }
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required"
+    } else if (!validateEmail(formData.email)) {
+      newErrors.email = "Please enter a valid email address"
+    }
+    if (!formData.mobile.trim()) {
+      newErrors.mobile = "Mobile number is required"
+    } else if (!validatePhone(formData.mobile)) {
+      newErrors.mobile = "Please enter a valid 10-digit phone number"
+    }
+    if (!formData.city.trim()) {
+      newErrors.city = "City is required"
+    }
+    if (!formData.applicant_category) {
+      newErrors.applicant_category = "Applicant category is required"
+    }
+    if (formData.applicant_category === "DIC" && !formData.dic_type) {
+      newErrors.dic_type = "DIC type is required"
+    }
+    
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const validateStep2 = (): boolean => {
+    const newErrors: Record<string, string> = {}
+    
+    if (!formData.project_title.trim()) {
+      newErrors.project_title = "Project title is required"
+    }
+    if (!formData.award_category) {
+      newErrors.award_category = "Award category is required"
+    }
+    if (!formData.problem_statement.trim()) {
+      newErrors.problem_statement = "Problem statement is required"
+    } else if (!validateWordCount(formData.problem_statement, 200, 300)) {
+      const wordCount = countWords(formData.problem_statement)
+      newErrors.problem_statement = `Problem statement must be between 200-300 words (currently ${wordCount} words)`
+    }
+    if (!formData.solution_description.trim()) {
+      newErrors.solution_description = "Solution description is required"
+    } else if (!validateWordCount(formData.solution_description, 200, 300)) {
+      const wordCount = countWords(formData.solution_description)
+      newErrors.solution_description = `Solution description must be between 200-300 words (currently ${wordCount} words)`
+    }
+    
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const validateStep3 = (): boolean => {
+    const newErrors: Record<string, string> = {}
+    
+    if (!formData.innovation_uniqueness.trim()) {
+      newErrors.innovation_uniqueness = "Innovation & Uniqueness is required"
+    } else if (!validateWordCount(formData.innovation_uniqueness, 200, 300)) {
+      const wordCount = countWords(formData.innovation_uniqueness)
+      newErrors.innovation_uniqueness = `Innovation & Uniqueness must be between 200-300 words (currently ${wordCount} words)`
+    }
+    if (!formData.impact_description.trim()) {
+      newErrors.impact_description = "Impact description is required"
+    } else if (!validateWordCount(formData.impact_description, 200, 300)) {
+      const wordCount = countWords(formData.impact_description)
+      newErrors.impact_description = `Impact description must be between 200-300 words (currently ${wordCount} words)`
+    }
+    if (!formData.atmanirbhar_contribution.trim()) {
+      newErrors.atmanirbhar_contribution = "Contribution to Aatmanirbhar Bharat is required"
+    } else if (!validateWordCount(formData.atmanirbhar_contribution, 150, 200)) {
+      const wordCount = countWords(formData.atmanirbhar_contribution)
+      newErrors.atmanirbhar_contribution = `Contribution must be between 150-200 words (currently ${wordCount} words)`
+    }
+    if (!formData.vision_2047_relevance.trim()) {
+      newErrors.vision_2047_relevance = "Relevance to India's Vision@2047 is required"
+    } else if (!validateWordCount(formData.vision_2047_relevance, 100, 150)) {
+      const wordCount = countWords(formData.vision_2047_relevance)
+      newErrors.vision_2047_relevance = `Relevance must be between 100-150 words (currently ${wordCount} words)`
+    }
+    
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const validateStep4 = (): boolean => {
+    const newErrors: Record<string, string> = {}
+    
+    if (!formData.project_stage) {
+      newErrors.project_stage = "Project stage is required"
+    }
+    
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const validateStep5 = (): boolean => {
+    const newErrors: Record<string, string> = {}
+    
+    if (formData.proposal_pdf_url.trim() && !validateURL(formData.proposal_pdf_url)) {
+      newErrors.proposal_pdf_url = "Please enter a valid URL (must start with http:// or https://)"
+    }
+    if (formData.video_url.trim() && !validateURL(formData.video_url)) {
+      newErrors.video_url = "Please enter a valid URL (must start with http:// or https://)"
+    }
+    if (!formData.terms_accepted) {
+      newErrors.terms_accepted = "You must accept the declaration"
+    }
+    if (!formData.data_consent) {
+      newErrors.data_consent = "You must consent to data usage"
+    }
+    
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
   }
 
   const handleNext = () => {
-    if (currentStep < totalSteps) {
+    let isValid = false
+    
+    switch (currentStep) {
+      case 1:
+        isValid = validateStep1()
+        break
+      case 2:
+        isValid = validateStep2()
+        break
+      case 3:
+        isValid = validateStep3()
+        break
+      case 4:
+        isValid = validateStep4()
+        break
+      default:
+        isValid = true
+    }
+    
+    if (isValid && currentStep < totalSteps) {
       setCurrentStep(currentStep + 1)
+      setErrors({}) // Clear errors when moving to next step
     }
   }
 
@@ -103,6 +283,25 @@ export function AwardApplicationForm({ onClose }: { onClose?: () => void }) {
   }
 
   const handleSubmit = async () => {
+    if (isSubmitting) return // Prevent double submission
+    
+    // Validate all steps before submission
+    const step1Valid = validateStep1()
+    const step2Valid = validateStep2()
+    const step3Valid = validateStep3()
+    const step4Valid = validateStep4()
+    const step5Valid = validateStep5()
+    
+    if (!step1Valid || !step2Valid || !step3Valid || !step4Valid || !step5Valid) {
+      // Scroll to first error or go to step with error
+      if (!step1Valid) setCurrentStep(1)
+      else if (!step2Valid) setCurrentStep(2)
+      else if (!step3Valid) setCurrentStep(3)
+      else if (!step4Valid) setCurrentStep(4)
+      else if (!step5Valid) setCurrentStep(5)
+      return
+    }
+    
     setIsSubmitting(true)
     try {
       const response = await fetch("/api/award-applications", {
@@ -117,11 +316,16 @@ export function AwardApplicationForm({ onClose }: { onClose?: () => void }) {
           if (onClose) onClose()
         }, 3000)
       } else {
-        alert("Failed to submit application. Please try again.")
+        const data = await response.json()
+        setErrors({
+          submit: data.error || "Failed to submit application. Please try again.",
+        })
       }
     } catch (error) {
       console.error("Error submitting application:", error)
-      alert("An error occurred. Please try again.")
+      setErrors({
+        submit: "An error occurred. Please try again.",
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -168,6 +372,12 @@ export function AwardApplicationForm({ onClose }: { onClose?: () => void }) {
         <div className="space-y-6">
           <h2 className="text-2xl font-bold mb-8">Section A: Applicant Information</h2>
 
+          {errors.submit && (
+            <div className="mb-4 p-4 bg-red-50 border-2 border-red-200 rounded-lg">
+              <p className="text-sm text-red-700 font-medium">{errors.submit}</p>
+            </div>
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <Label htmlFor="applicant_name" className="text-sm font-medium">
@@ -178,9 +388,10 @@ export function AwardApplicationForm({ onClose }: { onClose?: () => void }) {
                 value={formData.applicant_name}
                 onChange={(e) => updateFormData("applicant_name", e.target.value)}
                 placeholder="Enter your full name"
-                className="h-11 px-4"
+                className={`h-11 px-4 ${errors.applicant_name ? "border-red-500" : ""}`}
                 required
               />
+              {errors.applicant_name && <p className="text-xs text-red-600">{errors.applicant_name}</p>}
             </div>
 
             <div className="space-y-2">
@@ -192,9 +403,10 @@ export function AwardApplicationForm({ onClose }: { onClose?: () => void }) {
                 value={formData.designation}
                 onChange={(e) => updateFormData("designation", e.target.value)}
                 placeholder="Your designation"
-                className="h-11 px-4"
+                className={`h-11 px-4 ${errors.designation ? "border-red-500" : ""}`}
                 required
               />
+              {errors.designation && <p className="text-xs text-red-600">{errors.designation}</p>}
             </div>
           </div>
 
@@ -207,9 +419,10 @@ export function AwardApplicationForm({ onClose }: { onClose?: () => void }) {
               value={formData.organization}
               onChange={(e) => updateFormData("organization", e.target.value)}
               placeholder="Your organization"
-              className="h-11 px-4"
+              className={`h-11 px-4 ${errors.organization ? "border-red-500" : ""}`}
               required
             />
+            {errors.organization && <p className="text-xs text-red-600">{errors.organization}</p>}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -223,9 +436,10 @@ export function AwardApplicationForm({ onClose }: { onClose?: () => void }) {
                 value={formData.email}
                 onChange={(e) => updateFormData("email", e.target.value)}
                 placeholder="your.email@example.com"
-                className="h-11 px-4"
+                className={`h-11 px-4 ${errors.email ? "border-red-500" : ""}`}
                 required
               />
+              {errors.email && <p className="text-xs text-red-600">{errors.email}</p>}
             </div>
 
             <div className="space-y-2">
@@ -240,11 +454,12 @@ export function AwardApplicationForm({ onClose }: { onClose?: () => void }) {
                   const value = e.target.value.replace(/\D/g, "").slice(0, 10)
                   updateFormData("mobile", value)
                 }}
-                placeholder="+91 XXXXXXXXXX"
+                placeholder="10-digit phone number"
                 maxLength={10}
-                className="h-11 px-4"
+                className={`h-11 px-4 ${errors.mobile ? "border-red-500" : ""}`}
                 required
               />
+              {errors.mobile && <p className="text-xs text-red-600">{errors.mobile}</p>}
             </div>
           </div>
 
@@ -258,9 +473,10 @@ export function AwardApplicationForm({ onClose }: { onClose?: () => void }) {
                 value={formData.city}
                 onChange={(e) => updateFormData("city", e.target.value)}
                 placeholder="Your city"
-                className="h-11 px-4"
+                className={`h-11 px-4 ${errors.city ? "border-red-500" : ""}`}
                 required
               />
+              {errors.city && <p className="text-xs text-red-600">{errors.city}</p>}
             </div>
 
             <div className="space-y-2">
@@ -276,7 +492,7 @@ export function AwardApplicationForm({ onClose }: { onClose?: () => void }) {
                   }
                 }}
               >
-                <SelectTrigger className="h-11">
+                <SelectTrigger className={`h-11 ${errors.applicant_category ? "border-red-500" : ""}`}>
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
                 <SelectContent>
@@ -289,6 +505,7 @@ export function AwardApplicationForm({ onClose }: { onClose?: () => void }) {
                   <SelectItem value="DIC">DIC</SelectItem>
                 </SelectContent>
               </Select>
+              {errors.applicant_category && <p className="text-xs text-red-600">{errors.applicant_category}</p>}
             </div>
           </div>
 
@@ -298,7 +515,7 @@ export function AwardApplicationForm({ onClose }: { onClose?: () => void }) {
                 DIC Type *
               </Label>
               <Select value={formData.dic_type} onValueChange={(value) => updateFormData("dic_type", value)}>
-                <SelectTrigger className="h-11">
+                <SelectTrigger className={`h-11 ${errors.dic_type ? "border-red-500" : ""}`}>
                   <SelectValue placeholder="Select DIC type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -306,6 +523,7 @@ export function AwardApplicationForm({ onClose }: { onClose?: () => void }) {
                   <SelectItem value="Spoke">Spoke</SelectItem>
                 </SelectContent>
               </Select>
+              {errors.dic_type && <p className="text-xs text-red-600">{errors.dic_type}</p>}
             </div>
           )}
         </div>
@@ -325,9 +543,10 @@ export function AwardApplicationForm({ onClose }: { onClose?: () => void }) {
               value={formData.project_title}
               onChange={(e) => updateFormData("project_title", e.target.value)}
               placeholder="Enter your project title"
-              className="h-11 px-4"
+              className={`h-11 px-4 ${errors.project_title ? "border-red-500" : ""}`}
               required
             />
+            {errors.project_title && <p className="text-xs text-red-600">{errors.project_title}</p>}
           </div>
 
           <div className="space-y-2">
@@ -335,7 +554,7 @@ export function AwardApplicationForm({ onClose }: { onClose?: () => void }) {
               Award Category *
             </Label>
             <Select value={formData.award_category} onValueChange={(value) => updateFormData("award_category", value)}>
-              <SelectTrigger className="h-11">
+              <SelectTrigger className={`h-11 ${errors.award_category ? "border-red-500" : ""}`}>
                 <SelectValue placeholder="Select award category" />
               </SelectTrigger>
               <SelectContent>
@@ -345,6 +564,7 @@ export function AwardApplicationForm({ onClose }: { onClose?: () => void }) {
                 <SelectItem value="Technology Transfer Award">Technology Transfer Award</SelectItem>
               </SelectContent>
             </Select>
+            {errors.award_category && <p className="text-xs text-red-600">{errors.award_category}</p>}
           </div>
 
           <div className="space-y-2">
@@ -370,10 +590,16 @@ export function AwardApplicationForm({ onClose }: { onClose?: () => void }) {
               value={formData.problem_statement}
               onChange={(e) => updateFormData("problem_statement", e.target.value)}
               placeholder="Describe the problem your project addresses"
-              className="min-h-[120px] p-4"
+              className={`min-h-[120px] p-4 ${errors.problem_statement ? "border-red-500" : ""}`}
               rows={5}
               required
             />
+            {errors.problem_statement && <p className="text-xs text-red-600">{errors.problem_statement}</p>}
+            {!errors.problem_statement && formData.problem_statement && (
+              <p className="text-xs text-gray-500">
+                Word count: {countWords(formData.problem_statement)} / 200-300 words
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -385,10 +611,16 @@ export function AwardApplicationForm({ onClose }: { onClose?: () => void }) {
               value={formData.solution_description}
               onChange={(e) => updateFormData("solution_description", e.target.value)}
               placeholder="Describe your solution"
-              className="min-h-[120px] p-4"
+              className={`min-h-[120px] p-4 ${errors.solution_description ? "border-red-500" : ""}`}
               rows={5}
               required
             />
+            {errors.solution_description && <p className="text-xs text-red-600">{errors.solution_description}</p>}
+            {!errors.solution_description && formData.solution_description && (
+              <p className="text-xs text-gray-500">
+                Word count: {countWords(formData.solution_description)} / 200-300 words
+              </p>
+            )}
           </div>
         </div>
       )}
@@ -407,10 +639,16 @@ export function AwardApplicationForm({ onClose }: { onClose?: () => void }) {
               value={formData.innovation_uniqueness}
               onChange={(e) => updateFormData("innovation_uniqueness", e.target.value)}
               placeholder="What makes your solution innovative and unique?"
-              className="min-h-[120px] p-4"
+              className={`min-h-[120px] p-4 ${errors.innovation_uniqueness ? "border-red-500" : ""}`}
               rows={5}
               required
             />
+            {errors.innovation_uniqueness && <p className="text-xs text-red-600">{errors.innovation_uniqueness}</p>}
+            {!errors.innovation_uniqueness && formData.innovation_uniqueness && (
+              <p className="text-xs text-gray-500">
+                Word count: {countWords(formData.innovation_uniqueness)} / 200-300 words
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -422,10 +660,16 @@ export function AwardApplicationForm({ onClose }: { onClose?: () => void }) {
               value={formData.impact_description}
               onChange={(e) => updateFormData("impact_description", e.target.value)}
               placeholder="Describe the impact of your project"
-              className="min-h-[120px] p-4"
+              className={`min-h-[120px] p-4 ${errors.impact_description ? "border-red-500" : ""}`}
               rows={5}
               required
             />
+            {errors.impact_description && <p className="text-xs text-red-600">{errors.impact_description}</p>}
+            {!errors.impact_description && formData.impact_description && (
+              <p className="text-xs text-gray-500">
+                Word count: {countWords(formData.impact_description)} / 200-300 words
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -437,10 +681,16 @@ export function AwardApplicationForm({ onClose }: { onClose?: () => void }) {
               value={formData.atmanirbhar_contribution}
               onChange={(e) => updateFormData("atmanirbhar_contribution", e.target.value)}
               placeholder="How does your project contribute to Aatmanirbhar Bharat?"
-              className="min-h-[100px] p-4"
+              className={`min-h-[100px] p-4 ${errors.atmanirbhar_contribution ? "border-red-500" : ""}`}
               rows={4}
               required
             />
+            {errors.atmanirbhar_contribution && <p className="text-xs text-red-600">{errors.atmanirbhar_contribution}</p>}
+            {!errors.atmanirbhar_contribution && formData.atmanirbhar_contribution && (
+              <p className="text-xs text-gray-500">
+                Word count: {countWords(formData.atmanirbhar_contribution)} / 150-200 words
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -452,10 +702,16 @@ export function AwardApplicationForm({ onClose }: { onClose?: () => void }) {
               value={formData.vision_2047_relevance}
               onChange={(e) => updateFormData("vision_2047_relevance", e.target.value)}
               placeholder="How does your project align with Vision@2047?"
-              className="min-h-[100px] p-4"
+              className={`min-h-[100px] p-4 ${errors.vision_2047_relevance ? "border-red-500" : ""}`}
               rows={4}
               required
             />
+            {errors.vision_2047_relevance && <p className="text-xs text-red-600">{errors.vision_2047_relevance}</p>}
+            {!errors.vision_2047_relevance && formData.vision_2047_relevance && (
+              <p className="text-xs text-gray-500">
+                Word count: {countWords(formData.vision_2047_relevance)} / 100-150 words
+              </p>
+            )}
           </div>
         </div>
       )}
@@ -470,7 +726,7 @@ export function AwardApplicationForm({ onClose }: { onClose?: () => void }) {
               Project Stage *
             </Label>
             <Select value={formData.project_stage} onValueChange={(value) => updateFormData("project_stage", value)}>
-              <SelectTrigger className="h-11">
+              <SelectTrigger className={`h-11 ${errors.project_stage ? "border-red-500" : ""}`}>
                 <SelectValue placeholder="Select stage" />
               </SelectTrigger>
               <SelectContent>
@@ -480,6 +736,7 @@ export function AwardApplicationForm({ onClose }: { onClose?: () => void }) {
                 <SelectItem value="Commercialized">Commercialized</SelectItem>
               </SelectContent>
             </Select>
+            {errors.project_stage && <p className="text-xs text-red-600">{errors.project_stage}</p>}
           </div>
 
           <div className="space-y-2">
@@ -541,8 +798,9 @@ export function AwardApplicationForm({ onClose }: { onClose?: () => void }) {
               value={formData.proposal_pdf_url}
               onChange={(e) => updateFormData("proposal_pdf_url", e.target.value)}
               placeholder="https://drive.google.com/..."
-              className="h-11 px-4"
+              className={`h-11 px-4 ${errors.proposal_pdf_url ? "border-red-500" : ""}`}
             />
+            {errors.proposal_pdf_url && <p className="text-xs text-red-600">{errors.proposal_pdf_url}</p>}
             <p className="text-xs text-muted-foreground mt-2">
               Upload your PDF to Google Drive and paste the public link here
             </p>
@@ -557,8 +815,9 @@ export function AwardApplicationForm({ onClose }: { onClose?: () => void }) {
               value={formData.video_url}
               onChange={(e) => updateFormData("video_url", e.target.value)}
               placeholder="https://youtube.com/... or https://drive.google.com/..."
-              className="h-11 px-4"
+              className={`h-11 px-4 ${errors.video_url ? "border-red-500" : ""}`}
             />
+            {errors.video_url && <p className="text-xs text-red-600">{errors.video_url}</p>}
           </div>
 
           <div className="border rounded-lg p-6 space-y-4 bg-gray-50 mt-8">
@@ -569,11 +828,14 @@ export function AwardApplicationForm({ onClose }: { onClose?: () => void }) {
                 id="terms_accepted"
                 checked={formData.terms_accepted}
                 onCheckedChange={(checked) => updateFormData("terms_accepted", checked === true)}
-                className="mt-1"
+                className={`mt-1 ${errors.terms_accepted ? "border-red-500" : ""}`}
               />
-              <Label htmlFor="terms_accepted" className="text-sm leading-relaxed cursor-pointer">
-                I hereby declare that the information provided is true and accurate to the best of my knowledge.
-              </Label>
+              <div className="flex-1">
+                <Label htmlFor="terms_accepted" className="text-sm leading-relaxed cursor-pointer">
+                  I hereby declare that the information provided is true and accurate to the best of my knowledge.
+                </Label>
+                {errors.terms_accepted && <p className="text-xs text-red-600 mt-1">{errors.terms_accepted}</p>}
+              </div>
             </div>
 
             <div className="flex items-start space-x-3">
@@ -581,11 +843,14 @@ export function AwardApplicationForm({ onClose }: { onClose?: () => void }) {
                 id="data_consent"
                 checked={formData.data_consent}
                 onCheckedChange={(checked) => updateFormData("data_consent", checked === true)}
-                className="mt-1"
+                className={`mt-1 ${errors.data_consent ? "border-red-500" : ""}`}
               />
-              <Label htmlFor="data_consent" className="text-sm leading-relaxed cursor-pointer">
-                I consent to the use of my data for evaluation purposes and agree to the terms and conditions.
-              </Label>
+              <div className="flex-1">
+                <Label htmlFor="data_consent" className="text-sm leading-relaxed cursor-pointer">
+                  I consent to the use of my data for evaluation purposes and agree to the terms and conditions.
+                </Label>
+                {errors.data_consent && <p className="text-xs text-red-600 mt-1">{errors.data_consent}</p>}
+              </div>
             </div>
           </div>
         </div>

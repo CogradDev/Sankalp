@@ -25,6 +25,7 @@ interface RegistrationModalProps {
 export function RegistrationModal({ open, onOpenChange }: RegistrationModalProps) {
   const [currentStep, setCurrentStep] = useState(1)
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   // Step 1 - Team Details
   const [teamName, setTeamName] = useState("")
@@ -46,6 +47,23 @@ export function RegistrationModal({ open, onOpenChange }: RegistrationModalProps
   const [portfolioLink, setPortfolioLink] = useState("")
 
   const [errors, setErrors] = useState<Record<string, string>>({})
+
+  // Validation helper functions
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return emailRegex.test(email)
+  }
+
+  const validatePhone = (phone: string): boolean => {
+    const phoneRegex = /^\d{10}$/
+    return phoneRegex.test(phone.replace(/\D/g, ""))
+  }
+
+  const validateURL = (url: string): boolean => {
+    if (!url.trim()) return true // Optional field
+    const urlRegex = /^https?:\/\/.+/
+    return urlRegex.test(url)
+  }
 
   const challenges = [
     { id: "education", name: "AI for Education — Smart Pedagogy Systems", color: "orange" },
@@ -72,9 +90,48 @@ export function RegistrationModal({ open, onOpenChange }: RegistrationModalProps
     if (!teamName.trim()) newErrors.teamName = "Team name is required"
     if (!teamSize) newErrors.teamSize = "Team size is required"
     if (!leaderName.trim()) newErrors.leaderName = "Leader name is required"
-    if (!leaderEmail.trim()) newErrors.leaderEmail = "Leader email is required"
-    if (!leaderPhone.trim()) newErrors.leaderPhone = "Phone number is required"
+    if (!leaderEmail.trim()) {
+      newErrors.leaderEmail = "Leader email is required"
+    } else if (!validateEmail(leaderEmail)) {
+      newErrors.leaderEmail = "Please enter a valid email address"
+    }
+    if (!leaderPhone.trim()) {
+      newErrors.leaderPhone = "Phone number is required"
+    } else if (!validatePhone(leaderPhone)) {
+      newErrors.leaderPhone = "Please enter a valid 10-digit phone number"
+    }
     if (!collegeName.trim()) newErrors.collegeName = "College name is required"
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const validateStep2 = () => {
+    const newErrors: Record<string, string> = {}
+    const teamSizeNum = Number.parseInt(teamSize)
+    
+    if (teamSizeNum > 1) {
+      const expectedMembers = teamSizeNum - 1
+      if (teamMembers.length !== expectedMembers) {
+        newErrors.teamMembers = `Please add ${expectedMembers} team member${expectedMembers > 1 ? "s" : ""}`
+      } else {
+        teamMembers.forEach((member, index) => {
+          if (!member.name.trim()) {
+            newErrors[`member_${member.id}_name`] = "Name is required"
+          }
+          if (!member.email.trim()) {
+            newErrors[`member_${member.id}_email`] = "Email is required"
+          } else if (!validateEmail(member.email)) {
+            newErrors[`member_${member.id}_email`] = "Please enter a valid email address"
+          }
+          if (!member.college.trim()) {
+            newErrors[`member_${member.id}_college`] = "College/Organization is required"
+          }
+          if (!member.role.trim()) {
+            newErrors[`member_${member.id}_role`] = "Role is required"
+          }
+        })
+      }
+    }
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -92,14 +149,19 @@ export function RegistrationModal({ open, onOpenChange }: RegistrationModalProps
     if (!solutionIdea.trim()) newErrors.solutionIdea = "Solution idea is required"
     if (!techStack.trim()) newErrors.techStack = "Tech stack is required"
     if (!priorExperience) newErrors.priorExperience = "Please select prior experience"
+    if (portfolioLink.trim() && !validateURL(portfolioLink)) {
+      newErrors.portfolioLink = "Please enter a valid URL (must start with http:// or https://)"
+    }
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
 
   const handleNext = () => {
+    if (isSubmitting) return // Prevent double submission
+    
     if (currentStep === 1 && validateStep1()) {
       setCurrentStep(2)
-    } else if (currentStep === 2) {
+    } else if (currentStep === 2 && validateStep2()) {
       setCurrentStep(3)
     } else if (currentStep === 3 && validateStep3()) {
       setCurrentStep(4)
@@ -114,6 +176,11 @@ export function RegistrationModal({ open, onOpenChange }: RegistrationModalProps
   }
 
   const handleSubmit = async () => {
+    if (isSubmitting) return // Prevent double submission
+    
+    setIsSubmitting(true)
+    setErrors({}) // Clear previous errors
+    
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || ""
       if (!apiUrl) {
@@ -128,7 +195,7 @@ export function RegistrationModal({ open, onOpenChange }: RegistrationModalProps
         teamSize,
         leaderName,
         leaderEmail,
-        leaderPhone,
+        leaderPhone: leaderPhone.replace(/\D/g, ""), // Ensure only digits
         collegeName,
         teamMembers: teamMembersData,
         selectedChallenge,
@@ -159,6 +226,8 @@ export function RegistrationModal({ open, onOpenChange }: RegistrationModalProps
       setErrors({
         submit: err instanceof Error ? err.message : "An error occurred. Please try again.",
       })
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -166,6 +235,7 @@ export function RegistrationModal({ open, onOpenChange }: RegistrationModalProps
     // Reset form state
     setCurrentStep(1)
     setIsSubmitted(false)
+    setIsSubmitting(false)
     setTeamName("")
     setTeamSize("")
     setLeaderName("")
@@ -310,7 +380,7 @@ export function RegistrationModal({ open, onOpenChange }: RegistrationModalProps
                     >
                       <SelectValue placeholder="Select team size" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="z-50">
                       <SelectItem value="1">1 Member (Solo)</SelectItem>
                       <SelectItem value="2">2 Members</SelectItem>
                       <SelectItem value="3">3 Members</SelectItem>
@@ -359,9 +429,13 @@ export function RegistrationModal({ open, onOpenChange }: RegistrationModalProps
                     <Input
                       id="leaderPhone"
                       type="tel"
-                      placeholder="+91 XXXXX XXXXX"
+                      placeholder="10-digit phone number"
                       value={leaderPhone}
-                      onChange={(e) => setLeaderPhone(e.target.value)}
+                      onChange={(e) => {
+                        const numericValue = e.target.value.replace(/\D/g, "").slice(0, 10)
+                        setLeaderPhone(numericValue)
+                      }}
+                      maxLength={10}
                       className={`!bg-white !text-gray-900 placeholder:text-gray-400 border-2 focus:border-orange-500 focus:ring-2 focus:ring-orange-100 ${errors.leaderPhone ? "border-red-600" : "border-gray-300"}`}
                     />
                     {errors.leaderPhone && <p className="text-xs text-red-600">{errors.leaderPhone}</p>}
@@ -398,6 +472,11 @@ export function RegistrationModal({ open, onOpenChange }: RegistrationModalProps
                 )}
               </div>
 
+              {errors.teamMembers && (
+                <div className="mb-4 p-4 bg-red-50 border-2 border-red-200 rounded-lg">
+                  <p className="text-sm text-red-700 font-medium">{errors.teamMembers}</p>
+                </div>
+              )}
               {Number.parseInt(teamSize) === 1 ? (
                 <div className="text-center py-12">
                   <p className="text-gray-600">You selected solo participation. No additional members needed.</p>
@@ -427,39 +506,59 @@ export function RegistrationModal({ open, onOpenChange }: RegistrationModalProps
                       </div>
 
                       <div className="grid md:grid-cols-2 gap-4">
-                        <Input
-                          placeholder="Full Name"
-                          value={member.name}
-                          onChange={(e) => updateMember(member.id, "name", e.target.value)}
-                          className="!bg-white !text-gray-900 border-2 border-gray-300"
-                        />
-                        <Input
-                          type="email"
-                          placeholder="Email"
-                          value={member.email}
-                          onChange={(e) => updateMember(member.id, "email", e.target.value)}
-                          className="!bg-white !text-gray-900 border-2 border-gray-300"
-                        />
+                        <div className="space-y-1">
+                          <Input
+                            placeholder="Full Name"
+                            value={member.name}
+                            onChange={(e) => updateMember(member.id, "name", e.target.value)}
+                            className={`!bg-white !text-gray-900 border-2 ${errors[`member_${member.id}_name`] ? "border-red-600" : "border-gray-300"}`}
+                          />
+                          {errors[`member_${member.id}_name`] && (
+                            <p className="text-xs text-red-600">{errors[`member_${member.id}_name`]}</p>
+                          )}
+                        </div>
+                        <div className="space-y-1">
+                          <Input
+                            type="email"
+                            placeholder="Email"
+                            value={member.email}
+                            onChange={(e) => updateMember(member.id, "email", e.target.value)}
+                            className={`!bg-white !text-gray-900 border-2 ${errors[`member_${member.id}_email`] ? "border-red-600" : "border-gray-300"}`}
+                          />
+                          {errors[`member_${member.id}_email`] && (
+                            <p className="text-xs text-red-600">{errors[`member_${member.id}_email`]}</p>
+                          )}
+                        </div>
                       </div>
 
                       <div className="grid md:grid-cols-2 gap-4">
-                        <Input
-                          placeholder="College / Organization"
-                          value={member.college}
-                          onChange={(e) => updateMember(member.id, "college", e.target.value)}
-                          className="!bg-white !text-gray-900 border-2 border-gray-300"
-                        />
-                        <Select value={member.role} onValueChange={(value) => updateMember(member.id, "role", value)}>
-                          <SelectTrigger className="!bg-white border-2 border-gray-300">
-                            <SelectValue placeholder="Select role" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="developer">Developer</SelectItem>
-                            <SelectItem value="ai">AI/ML</SelectItem>
-                            <SelectItem value="design">Design</SelectItem>
-                            <SelectItem value="domain">Domain Expert</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <div className="space-y-1">
+                          <Input
+                            placeholder="College / Organization"
+                            value={member.college}
+                            onChange={(e) => updateMember(member.id, "college", e.target.value)}
+                            className={`!bg-white !text-gray-900 border-2 ${errors[`member_${member.id}_college`] ? "border-red-600" : "border-gray-300"}`}
+                          />
+                          {errors[`member_${member.id}_college`] && (
+                            <p className="text-xs text-red-600">{errors[`member_${member.id}_college`]}</p>
+                          )}
+                        </div>
+                        <div className="space-y-1">
+                          <Select value={member.role} onValueChange={(value) => updateMember(member.id, "role", value)}>
+                            <SelectTrigger className={`!bg-white border-2 ${errors[`member_${member.id}_role`] ? "border-red-600" : "border-gray-300"}`}>
+                              <SelectValue placeholder="Select role" />
+                            </SelectTrigger>
+                            <SelectContent className="z-50">
+                              <SelectItem value="developer">Developer</SelectItem>
+                              <SelectItem value="ai">AI/ML</SelectItem>
+                              <SelectItem value="design">Design</SelectItem>
+                              <SelectItem value="domain">Domain Expert</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          {errors[`member_${member.id}_role`] && (
+                            <p className="text-xs text-red-600">{errors[`member_${member.id}_role`]}</p>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -568,7 +667,7 @@ export function RegistrationModal({ open, onOpenChange }: RegistrationModalProps
                     >
                       <SelectValue placeholder="Select experience level" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="z-50">
                       <SelectItem value="beginner">Beginner (Learning)</SelectItem>
                       <SelectItem value="intermediate">Intermediate (Some Projects)</SelectItem>
                       <SelectItem value="advanced">Advanced (Multiple Projects)</SelectItem>
@@ -587,8 +686,9 @@ export function RegistrationModal({ open, onOpenChange }: RegistrationModalProps
                     placeholder="https://github.com/yourprofile or portfolio link"
                     value={portfolioLink}
                     onChange={(e) => setPortfolioLink(e.target.value)}
-                    className="!bg-white !text-gray-900 border-2 border-gray-300"
+                    className={`!bg-white !text-gray-900 border-2 ${errors.portfolioLink ? "border-red-600" : "border-gray-300"}`}
                   />
+                  {errors.portfolioLink && <p className="text-xs text-red-600">{errors.portfolioLink}</p>}
                 </div>
               </div>
             </div>
@@ -603,9 +703,13 @@ export function RegistrationModal({ open, onOpenChange }: RegistrationModalProps
               Back
             </Button>
           )}
-          <Button onClick={handleNext} className="flex-1 bg-orange-600 hover:bg-orange-700 text-white">
-            {currentStep === 4 ? "Submit Registration" : "Next"}
-            {currentStep < 4 && <ArrowRight className="w-4 h-4 ml-2" />}
+          <Button 
+            onClick={handleNext} 
+            className="flex-1 bg-orange-600 hover:bg-orange-700 text-white"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Submitting..." : currentStep === 4 ? "Submit Registration" : "Next"}
+            {currentStep < 4 && !isSubmitting && <ArrowRight className="w-4 h-4 ml-2" />}
           </Button>
         </div>
       </DialogContent>

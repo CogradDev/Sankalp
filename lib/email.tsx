@@ -1,9 +1,17 @@
 import { Resend } from "resend"
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+// Lazy initialization to avoid build-time errors when API key is missing
+function getResend() {
+  const apiKey = process.env.RESEND_API_KEY
+  if (!apiKey) {
+    throw new Error("RESEND_API_KEY is not configured. Email functionality is disabled.")
+  }
+  return new Resend(apiKey)
+}
 
 export async function sendConfirmationEmail(email: string, name: string) {
   try {
+    const resend = getResend()
     const result = await resend.emails.send({
       from: "onboarding@resend.dev",
       to: email,
@@ -79,6 +87,7 @@ export async function sendAdminNotification(details: {
   adminEmail: string
 }) {
   try {
+    const resend = getResend()
     const result = await resend.emails.send({
       from: "onboarding@resend.dev",
       to: details.adminEmail,

@@ -15,6 +15,8 @@ services:
         sync: false  # Set admin email in Render dashboard
       - key: ADMIN_PASSWORD
         sync: false  # Set admin password in Render dashboard
+      - key: HACKATHON_SITE_URL
+        sync: false  # Set hackathon static site URL for CORS (e.g., https://sankalp-hackathon.onrender.com)
       # Optional: Uncomment and set these if you want to use email notifications
       # - key: RESEND_API_KEY
       #   sync: false
@@ -27,3 +29,13 @@ services:
       #   sync: false
     healthCheckPath: /
     autoDeploy: true
+
+  - type: web
+    name: sankalp-hackathon-site
+    runtime: static
+    buildCommand: cd "sankalp hack/v0-hackathon-landing-page" && pnpm install && pnpm build
+    staticPublishPath: sankalp hack/v0-hackathon-landing-page/out
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        sync: false  # Set main SANKALP API URL (e.g., https://sankalp-2026-website.onrender.com)
+    pullRequestPreviewsEnabled: false

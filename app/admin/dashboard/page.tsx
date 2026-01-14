@@ -4,11 +4,12 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Loader2, Users, Award, LogOut, ArrowRight } from "lucide-react"
+import { Loader2, Users, Award, LogOut, ArrowRight, Code } from "lucide-react"
 
 interface Stats {
   registrations: number
   awardApplications: number
+  hackathonRegistrations: number
 }
 
 export default function AdminDashboardPage() {
@@ -84,7 +85,7 @@ export default function AdminDashboardPage() {
 
         {/* Stats Cards */}
         {!loading && stats && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <Card className="hover:shadow-lg transition-shadow border-t-4 border-t-orange-500">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
@@ -126,6 +127,27 @@ export default function AdminDashboardPage() {
                 </Button>
               </CardContent>
             </Card>
+
+            <Card className="hover:shadow-lg transition-shadow border-t-4 border-t-purple-500">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg font-semibold text-gray-700">Hackathon Registrations</CardTitle>
+                  <div className="p-3 bg-purple-100 rounded-full">
+                    <Code className="w-6 h-6 text-purple-600" />
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-4xl font-bold text-gray-900 mb-4">{stats.hackathonRegistrations}</div>
+                <Button
+                  onClick={() => router.push("/admin/hackathon-registrations")}
+                  className="w-full bg-purple-600 hover:bg-purple-700 text-white flex items-center justify-center gap-2"
+                >
+                  View All Registrations
+                  <ArrowRight size={18} />
+                </Button>
+              </CardContent>
+            </Card>
           </div>
         )}
 
@@ -158,6 +180,17 @@ export default function AdminDashboardPage() {
                     <span className="font-semibold">Manage Award Applications</span>
                   </div>
                   <span className="text-sm text-gray-600">Review and manage award submissions</span>
+                </Button>
+                <Button
+                  onClick={() => router.push("/admin/hackathon-registrations")}
+                  variant="outline"
+                  className="h-auto py-4 flex flex-col items-start gap-2"
+                >
+                  <div className="flex items-center gap-2 w-full">
+                    <Code size={20} />
+                    <span className="font-semibold">Manage Hackathon Registrations</span>
+                  </div>
+                  <span className="text-sm text-gray-600">View and manage hackathon team registrations</span>
                 </Button>
               </div>
             </CardContent>

@@ -11,6 +11,10 @@ services:
         value: production
       - key: MONGODB_URI
         sync: false  # Set this in Render dashboard with your MongoDB Atlas connection string
+      - key: ADMIN_EMAIL
+        sync: false  # Set admin email in Render dashboard
+      - key: ADMIN_PASSWORD
+        sync: false  # Set admin password in Render dashboard
       # Optional: Uncomment and set these if you want to use email notifications
       # - key: RESEND_API_KEY
       #   sync: false

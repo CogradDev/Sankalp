@@ -42,8 +42,42 @@ export default function AwardApplicationsAdminPage() {
     setLoading(true)
     try {
       const response = await fetch("/api/award-applications")
+      if (!response.ok) {
+        if (response.status === 401) {
+          window.location.href = "/admin/login"
+          return
+        }
+        throw new Error("Failed to fetch applications")
+      }
       const result = await response.json()
-      setApplications(result.applications || [])
+      // Transform MongoDB data structure to match interface
+      const transformedApplications = (result.applications || []).map((app: any) => ({
+        id: app._id?.toString() || app.id,
+        created_at: app.createdAt ? new Date(app.createdAt).toISOString() : app.created_at,
+        applicant_name: app.applicant_name,
+        email: app.email,
+        mobile: app.mobile,
+        organization: app.organization,
+        designation: app.designation,
+        applicant_category: app.applicant_category,
+        project_title: app.project_title,
+        award_category: app.award_category,
+        problem_statement: app.problem_statement,
+        solution_description: app.solution_description,
+        innovation_uniqueness: app.innovation_uniqueness,
+        impact_description: app.impact_description,
+        atmanirbhar_contribution: app.atmanirbhar_contribution,
+        vision_2047_relevance: app.vision_2047_relevance,
+        project_stage: app.project_stage,
+        trl_level: app.trl_level,
+        scalability_plan: app.scalability_plan,
+        team_size: app.team_size,
+        team_roles: app.team_roles,
+        proposal_pdf_url: app.proposal_pdf_url,
+        video_url: app.video_url,
+        status: app.status,
+      }))
+      setApplications(transformedApplications)
     } catch (error) {
       console.error("Error fetching applications:", error)
     } finally {

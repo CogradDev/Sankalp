@@ -25,8 +25,12 @@ export default function AdminRegistrationsPage() {
     setLoading(true)
     setError(null)
     try {
-      const response = await fetch("/api/registrations")
+      const response = await fetch("/api/register")
       if (!response.ok) {
+        if (response.status === 401) {
+          window.location.href = "/admin/login"
+          return
+        }
         throw new Error("Failed to fetch registrations")
       }
       const data = await response.json()

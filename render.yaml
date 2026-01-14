@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: sankalp-2026-website
+    env: node
+    region: oregon
+    plan: starter
+    buildCommand: pnpm install && pnpm build
+    startCommand: pnpm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false  # Set this in Render dashboard with your MongoDB Atlas connection string
+      # Optional: Uncomment and set these if you want to use email notifications
+      # - key: RESEND_API_KEY
+      #   sync: false
+      # - key: ADMIN_EMAIL_NOTIF
+      #   value: sunil.yadav@iiita.ac.in
+      # Optional: Uncomment if you switch to Supabase later
+      # - key: NEXT_PUBLIC_SUPABASE_URL
+      #   sync: false
+      # - key: SUPABASE_SERVICE_ROLE_KEY
+      #   sync: false
+    healthCheckPath: /
+    autoDeploy: true

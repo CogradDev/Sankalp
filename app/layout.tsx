@@ -4,8 +4,20 @@ import { Inter, Space_Grotesk } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
-const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], variable: "--font-space" })
+// Optimize font loading with display swap for better performance
+const inter = Inter({ 
+  subsets: ["latin"], 
+  variable: "--font-inter",
+  display: "swap", // Prevents invisible text during font load
+  preload: true,
+})
+
+const spaceGrotesk = Space_Grotesk({ 
+  subsets: ["latin"], 
+  variable: "--font-space",
+  display: "swap",
+  preload: false, // Only preload primary font
+})
 
 export const metadata: Metadata = {
   title: "SANKALP 2026 | National Summit on Innovation & Skills",

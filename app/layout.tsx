@@ -10,7 +10,7 @@ const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], variable: "--font-space
 export const metadata: Metadata = {
   title: "SANKALP 2026 | National Summit on Innovation & Skills",
   description:
-    "Join us at SANKALP 2026 - A 3-Day National Summit on Skilling and Nurturing Knowledge for Aatmanirbhar Leadership and Prosperity. March 17-19, 2026 at MNNIT Allahabad.",
+    "Join us at SANKALP 2026 - A 3-Day National Summit on Skilling and Nurturing Knowledge for Aatmanirbhar Leadership and Prosperity. March 24-26, 2026 at MNNIT Allahabad.",
   generator: "v0.app",
   keywords: [
     "SANKALP 2026",

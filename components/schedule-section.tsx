@@ -30,7 +30,7 @@ export function ScheduleSection() {
     {
       day: "Day 1",
       theme: "Knowledge",
-      date: "March 17, 2026",
+      date: "March 24, 2026",
       color: "from-blue-600 to-indigo-700",
       tabColor: "bg-blue-600",
       events: [
@@ -50,7 +50,7 @@ export function ScheduleSection() {
     {
       day: "Day 2",
       theme: "Skill",
-      date: "March 18, 2026",
+      date: "March 25, 2026",
       color: "from-orange-600 to-red-600",
       tabColor: "bg-orange-600",
       events: [
@@ -69,7 +69,7 @@ export function ScheduleSection() {
     {
       day: "Day 3",
       theme: "Leadership",
-      date: "March 19, 2026",
+      date: "March 26, 2026",
       color: "from-green-600 to-emerald-700",
       tabColor: "bg-green-600",
       events: [

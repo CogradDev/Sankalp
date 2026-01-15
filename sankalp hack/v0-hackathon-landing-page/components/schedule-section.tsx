@@ -42,7 +42,7 @@ const timeline = [
   {
     icon: Trophy,
     title: "Grand Finale",
-    time: "Mar 17-19",
+    time: "Mar 24-26",
     description: "@ MNNIT Allahabad",
     expandedDetails: "Live demo, technical defense, and final judging at SANKALP 2026.",
   },

@@ -92,7 +92,7 @@ export function HeroSection() {
                   className="text-white flex-shrink-0 group-hover:scale-110 transition-transform"
                   strokeWidth={2.5}
                 />
-                <span className="text-xs sm:text-base font-bold text-white whitespace-nowrap">March 17-19, 2026</span>
+                <span className="text-xs sm:text-base font-bold text-white whitespace-nowrap">March 24-26, 2026</span>
               </div>
             </div>
 

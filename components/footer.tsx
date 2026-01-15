@@ -31,7 +31,7 @@ export function Footer() {
               <Calendar className="w-5 h-5 text-orange-500" />
               <h4 className="font-bold text-white text-sm uppercase tracking-wide">Summit Dates</h4>
             </div>
-            <p className="text-orange-500 font-black text-2xl">March 17-19, 2026</p>
+            <p className="text-orange-500 font-black text-2xl">March 24-26, 2026</p>
             <p className="text-gray-400 font-medium text-sm">Prayagraj, Uttar Pradesh</p>
           </div>
         </div>

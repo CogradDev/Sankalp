@@ -37,7 +37,7 @@ export async function sendConfirmationEmail(email: string, name: string) {
             <div style="background-color: #eff6ff; border-left: 4px solid #ff6b35; padding: 15px; margin: 20px 0; border-radius: 4px;">
               <p style="color: #1e3a8a; margin: 0;"><strong>📅 Event Details:</strong></p>
               <p style="color: #374151; margin: 10px 0 0 0;">
-                <strong>Date:</strong> March 17-19, 2026<br />
+                <strong>Date:</strong> March 24-26, 2026<br />
                 <strong>Location:</strong> MNNIT Allahabad, Prayagraj, UP
               </p>
             </div>

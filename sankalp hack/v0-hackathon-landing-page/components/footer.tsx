@@ -24,7 +24,7 @@ export function Footer() {
               <div className="flex items-center gap-2 mb-4 md:justify-end">
                 <h3 className="text-sm font-bold uppercase tracking-wider text-gray-400">Grand Finale</h3>
               </div>
-              <p className="text-2xl font-bold text-orange-500 mb-2">March 17-19, 2026</p>
+              <p className="text-2xl font-bold text-orange-500 mb-2">March 24-26, 2026</p>
               <p className="text-sm text-gray-400">MNNIT Allahabad, Prayagraj</p>
             </div>
           </div>

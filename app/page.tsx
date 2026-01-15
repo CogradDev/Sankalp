@@ -35,10 +35,8 @@ const Footer = dynamic(() => import("@/components/footer").then(mod => ({ defaul
   loading: () => <div className="min-h-[200px]" />,
 })
 
-// ScrollToTop doesn't need SSR, load it client-side only
-const ScrollToTop = dynamic(() => import("@/components/scroll-to-top").then(mod => ({ default: mod.ScrollToTop })), {
-  ssr: false,
-})
+// ScrollToTop is a client component, lazy load it
+const ScrollToTop = dynamic(() => import("@/components/scroll-to-top").then(mod => ({ default: mod.ScrollToTop })))
 
 export default function Home() {
   return (

@@ -8,8 +8,6 @@ const nextConfig = {
   },
   // Enable compression for faster loading
   compress: true,
-  // Use SWC minification for better performance
-  swcMinify: true,
   // Add caching headers for static assets
   async headers() {
     return [
